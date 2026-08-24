@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/api/villes",
                                 "/api/chauffeur/documents/**"
                         ).permitAll()
+                        .requestMatchers("/api/passagers/**", "/api/chauffeurs/**").authenticated()
                         // Tout le reste nécessite un token
                         .anyRequest().authenticated()
                 )
