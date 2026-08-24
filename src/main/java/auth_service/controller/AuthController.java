@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordEncoder passwordEncoder;
 
 
     // POST /api/auth/connexion
@@ -54,6 +55,10 @@ public class AuthController {
             @Valid @RequestBody NouveauMotDePasseDTO dto) {
         authService.reinitialiserMotDePasse(dto);
         return ResponseEntity.ok("Mot de passe modifié avec succès.");
+    }
+    @GetMapping("/generer-hash")
+    public String genererHash(@RequestParam String motDePasse) {
+        return passwordEncoder.encode(motDePasse);
     }
 
 
