@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findByChauffeurId(Long chauffeurId);
     Optional<Document> findByChauffeurIdAndType(Long chauffeurId, String type);
+    List<Document> findByStatut(String statut);
 }
