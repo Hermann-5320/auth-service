@@ -114,6 +114,11 @@ public class ChauffeurController {
             chauffeur.setNbCourses(chauffeur.getNbCourses() + 1);
         }
 
+        if (body.containsKey("kmAAjouter")) {
+            BigDecimal kmAAjouter = BigDecimal.valueOf(((Number) body.get("kmAAjouter")).doubleValue());
+            chauffeur.setKmTotal(chauffeur.getKmTotal().add(kmAAjouter));
+        }
+
         chauffeurRepository.save(chauffeur);
         return ResponseEntity.ok("Stats mises à jour");
     }
