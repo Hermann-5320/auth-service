@@ -167,5 +167,53 @@ public class AuthService {
         int code = (int)(Math.random() * 9000) + 1000;
         return "SD-" + code;
     }
+    // ── BLOQUER / DEBLOQUER CHAUFFEUR (ADMIN) ──────────────
+    @Transactional
+    public void bloquerChauffeur(Long chauffeurId) {
+        Chauffeur chauffeur = chauffeurRepository.findById(chauffeurId)
+                .orElseThrow(() -> new RuntimeException("Chauffeur introuvable"));
+
+        Utilisateur utilisateur = chauffeur.getUtilisateur();
+        utilisateur.setStatut(Utilisateur.Statut.BLOQUE);
+        utilisateurRepository.save(utilisateur);
+
+        chauffeur.setStatut(Chauffeur.Statut.BLOQUE);
+        chauffeur.setEnLigne(false);
+        chauffeurRepository.save(chauffeur);
+    }
+
+    @Transactional
+    public void debloquerChauffeur(Long chauffeurId) {
+        Chauffeur chauffeur = chauffeurRepository.findById(chauffeurId)
+                .orElseThrow(() -> new RuntimeException("Chauffeur introuvable"));
+
+        Utilisateur utilisateur = chauffeur.getUtilisateur();
+        utilisateur.setStatut(Utilisateur.Statut.ACTIF);
+        utilisateurRepository.save(utilisateur);
+
+        chauffeur.setStatut(Chauffeur.Statut.ACTIF);
+        chauffeurRepository.save(chauffeur);
+    }
+
+    // ── BLOQUER / DEBLOQUER PASSAGER (ADMIN) ───────────────
+    @Transactional
+    public void bloquerPassager(Long passagerId) {
+        Passager passager = passagerRepository.findById(passagerId)
+                .orElseThrow(() -> new RuntimeException("Passager introuvable"));
+
+        Utilisateur utilisateur = passager.getUtilisateur();
+        utilisateur.setStatut(Utilisateur.Statut.BLOQUE);
+        utilisateurRepository.save(utilisateur);
+    }
+
+    @Transactional
+    public void debloquerPassager(Long passagerId) {
+        Passager passager = passagerRepository.findById(passagerId)
+                .orElseThrow(() -> new RuntimeException("Passager introuvable"));
+
+        Utilisateur utilisateur = passager.getUtilisateur();
+        utilisateur.setStatut(Utilisateur.Statut.ACTIF);
+        utilisateurRepository.save(utilisateur);
+    }
 
 }

@@ -70,6 +70,37 @@ public class AuthController {
         return ResponseEntity.ok("Chauffeur validé et activé avec succès");
     }
 
+    // Bloquer un chauffeur (Admin)
+    @PutMapping("/admin/chauffeurs/{chauffeurId}/bloquer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> bloquerChauffeur(@PathVariable Long chauffeurId) {
+        authService.bloquerChauffeur(chauffeurId);
+        return ResponseEntity.ok("Chauffeur bloqué avec succès");
+    }
+
+    // Débloquer un chauffeur (Admin)
+    @PutMapping("/admin/chauffeurs/{chauffeurId}/debloquer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> debloquerChauffeur(@PathVariable Long chauffeurId) {
+        authService.debloquerChauffeur(chauffeurId);
+        return ResponseEntity.ok("Chauffeur débloqué avec succès");
+    }
+
+    // Bloquer un passager (Admin)
+    @PutMapping("/admin/passagers/{passagerId}/bloquer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> bloquerPassager(@PathVariable Long passagerId) {
+        authService.bloquerPassager(passagerId);
+        return ResponseEntity.ok("Passager bloqué avec succès");
+    }
+
+    // Débloquer un passager (Admin)
+    @PutMapping("/admin/passagers/{passagerId}/debloquer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> debloquerPassager(@PathVariable Long passagerId) {
+        authService.debloquerPassager(passagerId);
+        return ResponseEntity.ok("Passager débloqué avec succès");
+    }
 
 
 }
