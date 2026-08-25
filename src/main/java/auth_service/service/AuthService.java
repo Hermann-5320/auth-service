@@ -136,5 +136,36 @@ public class AuthService {
         // En prod : récupérer l'email associé au code depuis la base
         // Pour le MVP on retourne juste un succès
     }
+    // ── VALIDER UN CHAUFFEUR (ADMIN) ───────────────────────
+    @Transactional
+    public void validerChauffeur(Long chauffeurId) {
+        Chauffeur chauffeur = chauffeurRepository.findById(chauffeurId)
+                .orElseThrow(() -> new RuntimeException("Chauffeur introuvable"));
+
+        Utilisateur utilisateur = chauffeur.getUtilisateur();
+
+        // Générer un mot de passe temporaire lisible
+        String motDePasseTemp = genererMotDePasseTemporaire();
+
+        utilisateur.setMotDePasse(passwordEncoder.encode(motDePasseTemp));
+        utilisateur.setStatut(Utilisateur.Statut.ACTIF);
+        utilisateurRepository.save(utilisateur);
+
+        chauffeur.setStatut(Chauffeur.Statut.ACTIF);
+        chauffeurRepository.save(chauffeur);
+
+        // Envoyer les identifiants par email
+        emailService.envoyerActivationCompte(
+                utilisateur.getEmail(),
+                chauffeur.getPrenom(),
+                motDePasseTemp
+        );
+    }
+
+    // Génère un mot de passe temporaire lisible (ex: SD-4829)
+    private String genererMotDePasseTemporaire() {
+        int code = (int)(Math.random() * 9000) + 1000;
+        return "SD-" + code;
+    }
 
 }

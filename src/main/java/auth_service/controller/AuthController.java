@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RestController
@@ -59,6 +60,14 @@ public class AuthController {
     @GetMapping("/generer-hash")
     public String genererHash(@RequestParam String motDePasse) {
         return passwordEncoder.encode(motDePasse);
+    }
+
+    // Valider le dossier d'un chauffeur (Admin uniquement)
+    @PutMapping("/admin/chauffeurs/{chauffeurId}/valider")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> validerChauffeur(@PathVariable Long chauffeurId) {
+        authService.validerChauffeur(chauffeurId);
+        return ResponseEntity.ok("Chauffeur validé et activé avec succès");
     }
 
 
