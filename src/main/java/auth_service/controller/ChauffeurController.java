@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import auth_service.dto.ChauffeurDisponibleDTO;
 import auth_service.dto.ChauffeurAdminDTO;
+import java.math.BigDecimal;
+import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
@@ -95,5 +97,24 @@ public class ChauffeurController {
                 .toList();
 
         return ResponseEntity.ok(resultat);
+    }
+    @PutMapping("/{chauffeurId}/stats")
+    public ResponseEntity<String> mettreAJourStats(
+            @PathVariable Long chauffeurId,
+            @RequestBody Map<String, Object> body) {
+
+        Chauffeur chauffeur = chauffeurRepository.findById(chauffeurId)
+                .orElseThrow(() -> new RuntimeException("Chauffeur introuvable"));
+
+        if (body.containsKey("noteMoyenne")) {
+            chauffeur.setNoteMoyenne(BigDecimal.valueOf(((Number) body.get("noteMoyenne")).doubleValue()));
+        }
+
+        if (body.containsKey("incrementerCourses") && (Boolean) body.get("incrementerCourses")) {
+            chauffeur.setNbCourses(chauffeur.getNbCourses() + 1);
+        }
+
+        chauffeurRepository.save(chauffeur);
+        return ResponseEntity.ok("Stats mises à jour");
     }
 }
