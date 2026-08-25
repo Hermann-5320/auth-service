@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface ChauffeurRepository extends JpaRepository<Chauffeur, Long> {
     Optional<Chauffeur> findByUtilisateurId(Long utilisateurId);
     List<Chauffeur> findByVille_IdAndEnLigneTrueAndStatut(Long villeId, Chauffeur.Statut statut);
+    List<Chauffeur> findByStatut(Chauffeur.Statut statut);
 }
