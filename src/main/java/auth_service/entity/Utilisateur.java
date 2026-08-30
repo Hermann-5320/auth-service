@@ -45,4 +45,9 @@ public class Utilisateur {
 
     @Column(name = "verrouille_jusqu_a")
     private LocalDateTime verrouilleJusquA;
+    @Column(name = "code_reset")
+    private String codeReset;
+
+    @Column(name = "code_reset_expire")
+    private LocalDateTime codeResetExpire;
 }

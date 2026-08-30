@@ -137,30 +137,42 @@ public class AuthService {
         emailService.envoyerConfirmationDossier(dto.getEmail(), dto.getPrenom());
     }
 
-    // ── RESET MOT DE PASSE ─────────────────────────────────
+    // ── DEMANDER UN RESET DE MOT DE PASSE ─────────────────
+    @Transactional
     public void demanderResetMotDePasse(ResetPasswordDTO dto) {
         Utilisateur utilisateur = utilisateurRepository
                 .findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Aucun compte trouvé avec cet email"));
 
-        // Générer un code à 6 chiffres
         String code = String.valueOf((int)(Math.random() * 900000) + 100000);
 
-        // En prod on stocke le code en base avec expiration
-        // Pour le MVP on l'envoie directement par email
-        emailService.envoyerCodeReset(dto.getEmail(), code);
+        utilisateur.setCodeReset(code);
+        utilisateur.setCodeResetExpire(java.time.LocalDateTime.now().plusMinutes(15));
+        utilisateurRepository.save(utilisateur);
 
+        emailService.envoyerCodeReset(dto.getEmail(), code);
     }
-    // ── REINITIALISER MOT DE PASSE ─────────────────────────
+
+    // ── REINITIALISER LE MOT DE PASSE ─────────────────────
+    @Transactional
     public void reinitialiserMotDePasse(NouveauMotDePasseDTO dto) {
-        // Pour le MVP on vérifie juste que le code existe
-        // En prod on vérifiera le code stocké en base avec expiration
-        if (dto.getCode() == null || dto.getCode().length() != 6) {
+        Utilisateur utilisateur = utilisateurRepository
+                .findByEmail(dto.getEmail())
+                .orElseThrow(() -> new RuntimeException("Aucun compte trouvé avec cet email"));
+
+        if (utilisateur.getCodeReset() == null || !utilisateur.getCodeReset().equals(dto.getCode())) {
             throw new RuntimeException("Code invalide");
         }
 
-        // En prod : récupérer l'email associé au code depuis la base
-        // Pour le MVP on retourne juste un succès
+        if (utilisateur.getCodeResetExpire() == null
+                || utilisateur.getCodeResetExpire().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("Ce code a expiré. Veuillez en demander un nouveau.");
+        }
+
+        utilisateur.setMotDePasse(passwordEncoder.encode(dto.getNouveauMotDePasse()));
+        utilisateur.setCodeReset(null);
+        utilisateur.setCodeResetExpire(null);
+        utilisateurRepository.save(utilisateur);
     }
     // ── VALIDER UN CHAUFFEUR (ADMIN) ───────────────────────
     @Transactional
