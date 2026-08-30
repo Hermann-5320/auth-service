@@ -7,6 +7,7 @@ import auth_service.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import auth_service.repository.VehiculeRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -20,6 +21,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final VehiculeRepository vehiculeRepository;
 
     // ── CONNEXION ──────────────────────────────────────────
     public TokenDTO connecter(ConnexionDTO dto) {
@@ -104,21 +106,18 @@ public class AuthService {
 
     // ── PRE-INSCRIPTION CHAUFFEUR ──────────────────────────
     @Transactional
-    public void preInscrireChauffeur(PreInscriptionChauffeurDTO dto) {
+    public Long preInscrireChauffeur(PreInscriptionChauffeurDTO dto) {
         if (utilisateurRepository.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("Cet email est déjà utilisé");
         }
 
-        // Créer l'utilisateur sans mot de passe
-        // Le mot de passe sera défini par l'admin après validation
         Utilisateur utilisateur = new Utilisateur();
         utilisateur.setEmail(dto.getEmail());
         utilisateur.setMotDePasse(passwordEncoder.encode("temp_" + System.currentTimeMillis()));
         utilisateur.setRole(Utilisateur.Role.CHAUFFEUR);
-        utilisateur.setStatut(Utilisateur.Statut.BLOQUE); // bloqué jusqu'à validation admin
+        utilisateur.setStatut(Utilisateur.Statut.BLOQUE);
         utilisateur = utilisateurRepository.save(utilisateur);
 
-        // Créer le chauffeur
         Chauffeur chauffeur = new Chauffeur();
         chauffeur.setUtilisateur(utilisateur);
         chauffeur.setNom(dto.getNom().toUpperCase());
@@ -131,10 +130,21 @@ public class AuthService {
                     .ifPresent(chauffeur::setVille);
         }
 
-        chauffeurRepository.save(chauffeur);
+        chauffeur = chauffeurRepository.save(chauffeur);
 
-        // Email de confirmation de réception du dossier
+        Vehicule vehicule = new Vehicule();
+        vehicule.setChauffeur(chauffeur);
+        vehicule.setType(dto.getTypeVehicule().toUpperCase());
+        vehicule.setMarque(dto.getMarque());
+        vehicule.setModele(dto.getModele());
+        vehicule.setCouleur(dto.getCouleur());
+        vehicule.setAnnee(dto.getAnnee());
+        vehicule.setImmatriculation(dto.getImmatriculation());
+        vehiculeRepository.save(vehicule);
+
         emailService.envoyerConfirmationDossier(dto.getEmail(), dto.getPrenom());
+
+        return chauffeur.getId();
     }
 
     // ── DEMANDER UN RESET DE MOT DE PASSE ─────────────────

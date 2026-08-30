@@ -35,10 +35,10 @@ public class AuthController {
 
     // POST /api/auth/chauffeur/pre-inscription
     @PostMapping("/chauffeur/pre-inscription")
-    public ResponseEntity<String> preInscrireChauffeur(
+    public ResponseEntity<Long> preInscrireChauffeur(
             @Valid @RequestBody PreInscriptionChauffeurDTO dto) {
-        authService.preInscrireChauffeur(dto);
-        return ResponseEntity.ok("Dossier soumis avec succès. Vous serez contacté sous 48h.");
+        Long chauffeurId = authService.preInscrireChauffeur(dto);
+        return ResponseEntity.ok(chauffeurId);
     }
 
     // POST /api/auth/mot-de-passe/reset
