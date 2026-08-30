@@ -12,6 +12,7 @@ import auth_service.dto.ChauffeurDisponibleDTO;
 import auth_service.dto.ChauffeurAdminDTO;
 import java.math.BigDecimal;
 import java.util.Map;
+import auth_service.dto.ChauffeurProfilDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
@@ -121,5 +122,36 @@ public class ChauffeurController {
 
         chauffeurRepository.save(chauffeur);
         return ResponseEntity.ok("Stats mises à jour");
+    }
+    @GetMapping("/mon-profil")
+    public ResponseEntity<ChauffeurProfilDTO> getMonProfil(
+            @RequestHeader("Authorization") String token) {
+
+        String jwt = token.substring(7);
+        String email = jwtService.extraireEmail(jwt);
+
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        Chauffeur chauffeur = chauffeurRepository.findByUtilisateurId(utilisateur.getId())
+                .orElseThrow(() -> new RuntimeException("Chauffeur introuvable"));
+
+        ChauffeurProfilDTO profil = new ChauffeurProfilDTO(
+                chauffeur.getId(),
+                chauffeur.getNom(),
+                chauffeur.getPrenom(),
+                utilisateur.getEmail(),
+                chauffeur.getTelephone(),
+                chauffeur.getVille() != null ? chauffeur.getVille().getNom() : null,
+                chauffeur.getStatut().name(),
+                chauffeur.getEnLigne(),
+                chauffeur.getNoteMoyenne(),
+                chauffeur.getNbCourses(),
+                chauffeur.getKmTotal(),
+                chauffeur.getNumeroMtn(),
+                chauffeur.getNumeroOrange()
+        );
+
+        return ResponseEntity.ok(profil);
     }
 }
