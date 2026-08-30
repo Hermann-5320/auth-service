@@ -37,3 +37,5 @@ app:
     expiration: ${APP_JWT_EXPIRATION:86400000}
   upload:
     dossier: ${APP_UPLOAD_DOSSIER:/home/otaku/school-driva-uploads/documents}
+  cors:
+    origins: ${CORS_ORIGINS:http://localhost:5173}
