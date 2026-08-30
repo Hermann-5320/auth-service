@@ -9,12 +9,20 @@ import auth_service.dto.PassagerAdminDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
+import auth_service.dto.PassagerProfilDTO;
+import auth_service.entity.Utilisateur;
+import auth_service.repository.UtilisateurRepository;
+import auth_service.security.JwtService;
+
+
 @RestController
 @RequestMapping("/api/passagers")
 @RequiredArgsConstructor
 public class PassagerController {
 
     private final PassagerRepository passagerRepository;
+    private final UtilisateurRepository utilisateurRepository;
+    private final JwtService jwtService;
 
     @GetMapping("/by-utilisateur/{utilisateurId}")
     public ResponseEntity<Long> getPassagerId(@PathVariable Long utilisateurId) {
@@ -44,5 +52,31 @@ public class PassagerController {
                 .toList();
 
         return ResponseEntity.ok(resultat);
+    }
+    @GetMapping("/mon-profil")
+    public ResponseEntity<PassagerProfilDTO> getMonProfil(
+            @RequestHeader("Authorization") String token) {
+
+        String jwt = token.substring(7);
+        String email = jwtService.extraireEmail(jwt);
+
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        Passager passager = passagerRepository.findByUtilisateurId(utilisateur.getId())
+                .orElseThrow(() -> new RuntimeException("Passager introuvable"));
+
+        PassagerProfilDTO profil = new PassagerProfilDTO(
+                passager.getId(),
+                passager.getNom(),
+                passager.getPrenom(),
+                utilisateur.getEmail(),
+                passager.getTelephone(),
+                passager.getVille() != null ? passager.getVille().getNom() : null,
+                utilisateur.getStatut().name(),
+                passager.getCreatedAt()
+        );
+
+        return ResponseEntity.ok(profil);
     }
 }
