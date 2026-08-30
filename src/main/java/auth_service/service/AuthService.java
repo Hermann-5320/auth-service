@@ -27,13 +27,39 @@ public class AuthService {
                 .findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email ou mot de passe incorrect"));
 
+        // Vérifier si le compte est actuellement verrouillé
+        if (utilisateur.getVerrouilleJusquA() != null
+                && utilisateur.getVerrouilleJusquA().isAfter(java.time.LocalDateTime.now())) {
+            long minutesRestantes = java.time.Duration.between(
+                    java.time.LocalDateTime.now(),
+                    utilisateur.getVerrouilleJusquA()
+            ).toMinutes() + 1;
+            throw new RuntimeException("Compte temporairement verrouillé. Réessayez dans " + minutesRestantes + " minute(s).");
+        }
+
         if (!passwordEncoder.matches(dto.getMotDePasse(), utilisateur.getMotDePasse())) {
+            // Incrémenter le compteur d'échecs
+            int tentatives = utilisateur.getTentativesEchouees() == null ? 0 : utilisateur.getTentativesEchouees();
+            tentatives++;
+            utilisateur.setTentativesEchouees(tentatives);
+
+            if (tentatives >= 5) {
+                utilisateur.setVerrouilleJusquA(java.time.LocalDateTime.now().plusMinutes(15));
+                utilisateur.setTentativesEchouees(0);
+            }
+
+            utilisateurRepository.save(utilisateur);
             throw new RuntimeException("Email ou mot de passe incorrect");
         }
 
         if (utilisateur.getStatut() == Utilisateur.Statut.BLOQUE) {
             throw new RuntimeException("Votre compte est bloqué. Contactez le support.");
         }
+
+        // Connexion réussie — réinitialiser le compteur
+        utilisateur.setTentativesEchouees(0);
+        utilisateur.setVerrouilleJusquA(null);
+        utilisateurRepository.save(utilisateur);
 
         String token = jwtService.genererToken(
                 utilisateur.getEmail(),

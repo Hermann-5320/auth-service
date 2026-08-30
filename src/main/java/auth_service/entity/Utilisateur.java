@@ -40,4 +40,9 @@ public class Utilisateur {
     public enum Statut {
         ACTIF, BLOQUE
     }
+    @Column(name = "tentatives_echouees")
+    private Integer tentativesEchouees = 0;
+
+    @Column(name = "verrouille_jusqu_a")
+    private LocalDateTime verrouilleJusquA;
 }
