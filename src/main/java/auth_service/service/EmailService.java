@@ -23,7 +23,7 @@ public class EmailService {
                         "Bonne route !\n" +
                         "L'équipe School Driva"
         );
-       // mailSender.send(message);
+        mailSender.send(message);
     }
 
     // Confirmation réception dossier chauffeur
@@ -39,7 +39,7 @@ public class EmailService {
                         "Merci de votre confiance.\n" +
                         "L'équipe School Driva"
         );
-       // mailSender.send(message);
+        mailSender.send(message);
     }
 
     // Code de réinitialisation mot de passe
@@ -55,7 +55,7 @@ public class EmailService {
                         "Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.\n\n" +
                         "L'équipe School Driva"
         );
-        //mailSender.send(message);
+        mailSender.send(message);
     }
 
     // Activation compte chauffeur par admin
@@ -73,6 +73,6 @@ public class EmailService {
                         "Bienvenue dans l'équipe School Driva !\n" +
                         "L'équipe School Driva"
         );
-       // mailSender.send(message);
+        mailSender.send(message);
     }
 }
