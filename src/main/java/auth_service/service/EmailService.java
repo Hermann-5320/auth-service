@@ -30,7 +30,7 @@ public class EmailService {
     public void envoyerConfirmationDossier(String email, String prenom) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("Dossier reçu — School Driva");
+        message.setSubject("School Driva : Dossier reçu  ");
         message.setText(
                 "Bonjour " + prenom + ",\n\n" +
                         "Nous avons bien reçu votre dossier de candidature.\n" +
@@ -46,7 +46,7 @@ public class EmailService {
     public void envoyerCodeReset(String email, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("Réinitialisation de mot de passe — School Driva");
+        message.setSubject("Réinitialisation de mot de passe School Driva");
         message.setText(
                 "Bonjour,\n\n" +
                         "Votre code de réinitialisation de mot de passe est :\n\n" +

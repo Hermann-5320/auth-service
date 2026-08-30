@@ -11,7 +11,13 @@ import auth_service.dto.RejetDocumentDTO;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import auth_service.repository.DocumentRepository;
-import auth_service.entity.Document;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.util.List;
 
@@ -93,5 +99,25 @@ public class DocumentController {
         documentRepository.save(document);
 
         return ResponseEntity.ok("Document rejeté");
+    }
+    // Recuperer un fichier
+    @GetMapping("/admin/{documentId}/fichier")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> getFichierDocument(@PathVariable Long documentId) throws IOException {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document introuvable"));
+
+        Path chemin = Paths.get(document.getChemin());
+        Resource resource = new UrlResource(chemin.toUri());
+
+        if (!resource.exists()) {
+            throw new RuntimeException("Fichier introuvable sur le serveur");
+        }
+
+        String contentType = Files.probeContentType(chemin);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType != null ? contentType : "application/octet-stream"))
+                .body(resource);
     }
 }
